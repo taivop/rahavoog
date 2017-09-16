@@ -34,7 +34,7 @@ function formatMoney(d, maxval) {
     return d.name + ": " + d.value + " [" + Math.round(100 * d.value / maxval)  + "%]";
 }
 
-d3.json("finants.json", function(error, finance) {
+d3.json("sample.json", function(error, finance) {
   if (error) throw error;
   var maxval = finance["maxval"];
   sankey(finance);
