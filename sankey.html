@@ -9,7 +9,7 @@ var svg = d3.select("svg"),
     height = +svg.attr("height");
 
 var formatNumber = d3.format(",.0f"),
-    format = function(d) { return formatNumber(d) + " TWh"; },
+    format = function(d) { return formatNumber(d) + " EUR"; },
     color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var sankey = d3.sankey()
@@ -30,13 +30,17 @@ var node = svg.append("g")
     .attr("font-size", 10)
   .selectAll("g");
 
-d3.json("finants.json", function(error, energy) {
-  if (error) throw error;
+function formatMoney(d, maxval) {
+    return d.name + ": " + d.value + " [" + Math.round(100 * d.value / maxval)  + "%]";
+}
 
-  sankey(energy);
+d3.json("finants.json", function(error, finance) {
+  if (error) throw error;
+  var maxval = finance["maxval"];
+  sankey(finance);
 
   link = link
-    .data(energy.links)
+    .data(finance.links)
     .enter().append("path")
       .attr("d", d3.sankeyLinkHorizontal())
       .attr("stroke-width", function(d) { return Math.max(1, d.width); });
@@ -45,7 +49,7 @@ d3.json("finants.json", function(error, energy) {
       .text(function(d) { return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
 
   node = node
-    .data(energy.nodes)
+    .data(finance.nodes)
     .enter().append("g");
 
   node.append("rect")
@@ -61,7 +65,7 @@ d3.json("finants.json", function(error, energy) {
       .attr("y", function(d) { return (d.y1 + d.y0) / 2; })
       .attr("dy", "0.35em")
       .attr("text-anchor", "end")
-      .text(function(d) { return d.name; })
+      .text(function(d) { return formatMoney(d, maxval); })
     .filter(function(d) { return d.x0 < width / 2; })
       .attr("x", function(d) { return d.x1 + 6; })
       .attr("text-anchor", "start");
